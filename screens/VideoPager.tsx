@@ -1,11 +1,8 @@
 // PhotoPager.tsx
-import { ReactNativeZoomableView } from '@openspacelabs/react-native-zoomable-view';
 import { PhotoIdentifier } from '@react-native-camera-roll/camera-roll';
-import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Dimensions, StyleSheet, FlatList } from 'react-native';
-import ImageViewer from 'react-native-image-zoom-viewer';
-import PagerView from 'react-native-pager-view';
+import Video from 'react-native-video';
 
 interface VideoPagerProps {
     route: {
@@ -19,29 +16,34 @@ interface VideoPagerProps {
 const VideoPager: React.FC<VideoPagerProps> = ({ route }) => {
     const { photos, selectedIndex } = route.params;
     const [initialPage, setInitialPage] = useState<number>(selectedIndex);
+    const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
 
     useEffect(() => {
         setInitialPage(selectedIndex);
     }, []);
-    const renderImage = ({ item }: { item: PhotoIdentifier }) => (
+    const renderImage = ({ item, index }: { item: PhotoIdentifier, index: number }) => (
         <View style={styles.page}>
-            <Image
-                style={{ width: '100%', height: '100%', margin: 10 }}
+            <Video
                 source={{ uri: item.node.image.uri }}
+                style={styles.video}
+                controls={true}
+                paused={index !== currentVideoIndex}
+                onFullscreenPlayerWillDismiss={() => setCurrentVideoIndex(null)}
+                onEnd={() => setCurrentVideoIndex(null)}
             />
-
         </View>
     );
     return (
         <FlatList
+            style={{ flex: 1 , }}
             data={photos}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={renderImage}
-            getItemLayout={(data, index) => (
-                { length: Dimensions.get('window').width, offset: Dimensions.get('window').width * index, index }
-            )}
+            renderItem={(data) => renderImage({ ...data, index: data.index })}
+            // getItemLayout={(data, index) => (
+            //     { length: Dimensions.get('window').width, offset: Dimensions.get('window').width * index, index }
+            // )}
             horizontal
-            initialScrollIndex={initialPage}
+            // initialScrollIndex={initialPage}
             pagingEnabled
             showsHorizontalScrollIndicator={false}
         />
@@ -50,29 +52,17 @@ const VideoPager: React.FC<VideoPagerProps> = ({ route }) => {
 
 const styles = StyleSheet.create({
     page: {
-        borderWidth: 20, flexShrink: 1,
-        height: Dimensions.get('window').height,
-        width: Dimensions.get('window').width,
-        backgroundColor: 'white',
-        borderBlockColor: 'white',
-        borderColor: 'white'
-    },
-    pagerView: {
         flex: 1,
-        backgroundColor: 'blue'
+        margin: 10
     },
-    item: {
+    video: {
         width: Dimensions.get('window').width,
         height: Dimensions.get('window').height,
-        justifyContent: 'center',
+        flex: 1,
+        alignSelf: 'center',
         alignItems: 'center',
+        justifyContent: 'center',
     },
-    images: {
-        width: '90%',
-        height: '90%',
-        resizeMode: 'cover',
-        padding: 15
-    }
 });
 
 export default VideoPager;

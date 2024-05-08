@@ -8,8 +8,8 @@ const HomeScreen = () => {
     const Tab = createMaterialTopTabNavigator();
     return (
         <Tab.Navigator>
-            <Tab.Screen name="PhotoScreen" component={PhotoScreen} />
-            <Tab.Screen name="VideoScreen" component={VideoScreen} />
+            <Tab.Screen name="PHOTOS" component={PhotoScreen} />
+            <Tab.Screen name="VIDEOS" component={VideoScreen} />
         </Tab.Navigator>
         // <View>
         //     <Text> test </Text>
