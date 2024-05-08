@@ -48,5 +48,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<!-- permission -->
+	 <key>NSPhotoLibraryUsageDescription</key>
+     <string>allow photo lib permission</string>
+	 <!-- video player -->
+	 <key>UIAppFonts</key>
+     <array>
+	 <string>MaterialIcons.ttf</string>
+     </array>
 </dict>
 </plist>
