@@ -1,21 +1,41 @@
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator } from '@react-navigation/drawer';
 import AboutScreen from './AboutScreen';
 import HomeScreen from './HomeScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import React, { useState,createContext } from 'react';
+import React, { useState, createContext, useContext } from 'react';
 import CheckBox from 'react-native-check-box'
 
-export const GlobalInfo = createContext("Ascending");
+const SortingContext  = createContext({
+    filterText: 'Descending', setFilterText: (text: string) => { }
+});
 const Drawer = () => {
     const Drawer = createDrawerNavigator();
     const Stack = createNativeStackNavigator();
-
+    const [filterText, setFilterText] = useState("Descending")
+    function CustomDrawerContent(props: DrawerContentComponentProps) {
+        return (
+          <DrawerContentScrollView
+            {...props}
+            contentContainerStyle={{flex: 1, justifyContent: 'space-between'}}>
+            <View style={{justifyContent: 'flex-start'}}>
+              <DrawerItemList {...props} />
+            </View>
+            <DrawerItem
+              label={()=><Text style={{alignSelf:'center', color:'black',fontSize:20}}>V1.0</Text>}
+              onPress={() => console.warn('Version: V1.0')}
+            />
+          </DrawerContentScrollView>
+        );
+      }
     return (
-        <Drawer.Navigator initialRouteName='HomeScreen'>
-            <Drawer.Screen name="Gallery" options={{
+        <SortingContext.Provider value={{ filterText, setFilterText}}>
+
+        <Drawer.Navigator initialRouteName='HomeScreen'
+                drawerContent={(props) => <CustomDrawerContent {...props} />}>
+            <Drawer.Screen name="Home" options={{
                 headerRight: () => <Filter />
             }}>
                 {() => (
@@ -24,82 +44,81 @@ const Drawer = () => {
                     </Stack.Navigator>
                 )}
             </Drawer.Screen>
-            <Drawer.Screen name="AboutScreen" component={AboutScreen} />
+            {/* <DrawerItem label={()=><Text style={{color:'black'}}>AboutScreen</Text>} onPress={()=>console.warn("version: V1.0")}/> */}
         </Drawer.Navigator>
+        </SortingContext.Provider>
     );
 };
 
 const Filter = () => {
     const [modalvisible, setmodalvisible] = useState(false)
-    const [fliterCheckboxEnabled, setFilterChecboxEnabled] = useState(true)
-    const [filterText, setFilterText] = useState("Ascending")
+    const [fliterCheckboxEnabled, setFilterChecboxEnabled] = useState(false)
+    const {filterText, setFilterText}= useContext(SortingContext)
+    const [sort,setSort]=useState("Descending")
 
     function handleFliterClick(): void {
         setmodalvisible(true)
     }
-    function handleFliterSaveClick(): void {
+    function handleFliterSaveClick(sortType:string): void {
         setmodalvisible(!modalvisible)
-        console.log(filterText)
+        setFilterText(sortType)
     }
     return (
-        <GlobalInfo.Provider value={filterText}>
-        <View>
-            {modalvisible ?
-                <View >
-                    <Modal style={{ flex: 1, justifyContent: "center", alignItems: 'center' }}
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalvisible}
-                        onRequestClose={() => {
-                            Alert.alert('Modal has been closed.');
-                            setmodalvisible(false)
-                        }}>
-                        <View style={style.modalView}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                                <CheckBox
-                                    style={{ padding: 10 }}
-                                    checkedCheckBoxColor='#2196F3'
-                                    onClick={() => {
-                                        setFilterChecboxEnabled(true)
-                                        setFilterText("Ascending")
-                                    }}
-                                    isChecked={fliterCheckboxEnabled}
-                                />
-                                <Text style={{ color: 'black', alignSelf: 'center' }}>Ascending</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                                <CheckBox
-                                    style={{ padding: 10 }}
-                                    checkedCheckBoxColor='#2196F3'
-                                    onClick={() => {
-                                        setFilterChecboxEnabled(false)
-                                        setFilterText("Descending")
-                                    }}
-                                    isChecked={!fliterCheckboxEnabled}
-                                />
-                                <Text style={{ color: 'black', alignSelf: 'center' }}>Descending</Text>
-                            </View>
+            <View>
+                {modalvisible ?
+                    <View >
+                        <Modal style={{ flex: 1, justifyContent: "center", alignItems: 'center' }}
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalvisible}
+                            onRequestClose={() => {
+                                Alert.alert('Modal has been closed.');
+                                setmodalvisible(false)
+                            }}>
+                            <View style={style.modalView}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                                    <CheckBox
+                                        style={{ padding: 10 }}
+                                        checkedCheckBoxColor='#2196F3'
+                                        onClick={() => {
+                                            setFilterChecboxEnabled(true)
+                                            setSort("Ascending")
+                                        }}
+                                        isChecked={fliterCheckboxEnabled}
+                                    />
+                                    <Text style={{ color: 'black', alignSelf: 'center' }}>Ascending</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                                    <CheckBox
+                                        style={{ padding: 10 }}
+                                        checkedCheckBoxColor='#2196F3'
+                                        onClick={() => {
+                                            setFilterChecboxEnabled(false)
+                                            setSort("Descending")
+                                        }}
+                                        isChecked={!fliterCheckboxEnabled}
+                                    />
+                                    <Text style={{ color: 'black', alignSelf: 'center' }}>Descending</Text>
+                                </View>
 
-                            <Pressable
-                                style={[style.button, style.buttonClose]}
-                                onPress={() => handleFliterSaveClick()}>
-                                <Text style={{ color: 'black' }}>Save</Text>
-                            </Pressable>
-                        </View>
-                    </Modal>
-                </View>
-                : null}
-            <TouchableOpacity onPress={() => handleFliterClick()}>
-                <Icon name="filter" size={25}
-                    color='black'
-                    style={{
-                        marginRight: 15, alignSelf: 'flex-end',
-                        justifyContent: 'center', alignContent: 'center'
-                    }} />
-            </TouchableOpacity>
-        </View>
-        </GlobalInfo.Provider>
-
+                                <Pressable
+                                    style={[style.button, style.buttonClose]}
+                                    onPress={() => handleFliterSaveClick(sort)}>
+                                    <Text style={{ color: 'black' }}>Save</Text>
+                                </Pressable>
+                            </View>
+                        </Modal>
+                    </View>
+                    : null}
+                <TouchableOpacity onPress={() => handleFliterClick()}>
+                    <Icon name="filter" size={25}
+                        color='black'
+                        style={{
+                            marginRight: 15, alignSelf: 'flex-end',
+                            justifyContent: 'center', alignContent: 'center'
+                        }} />
+                </TouchableOpacity>
+            </View>
     )
 }
 const style = StyleSheet.create({
@@ -135,3 +154,4 @@ const style = StyleSheet.create({
     },
 })
 export default Drawer;
+export const useFilter = () => useContext(SortingContext)

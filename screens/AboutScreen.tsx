@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 const AboutScreen = () => {
+
+  useEffect(() => {
+    console.warn("Version : V1.0")
+  }, [])
   return (
-    <View>
-      <Text>AboutScreen</Text>
-    </View>
+    null
   )
 }
 
